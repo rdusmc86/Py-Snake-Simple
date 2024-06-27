@@ -6,13 +6,22 @@ import random
 # snake
 class Snake(object):
     def __init__(self):
+        # snake attributes
         self.length = 1
         self.positions = [((SCREEN_WIDTH / 2), (SCREEN_HEIGHT /2))]
         self.direction = random.choice([UP, DOWN, LEFT, RIGHT])
         self.color = (54, 196, 0)
 
     def get_head_position(self):
+        # return snake head position
         return self.positions[0]
+    
+    def game_over(self):
+        # checks game over if snake collides with self
+        head_pos = self.get_head_position()
+        if head_pos in self.positions[1:]:
+            return True
+        return False
 
     def turn(self, point):
         if self.length > 1 and (point[0] * -1, point [1] * -1) == self.direction:
@@ -21,6 +30,7 @@ class Snake(object):
             self.direction = point
 
     def move(self):
+        # moves snake in current direction and updates position
         cur = self.get_head_position()
         x, y = self.direction
         new = (((cur[0] + (x*GRIDSIZE)) % SCREEN_WIDTH), (cur[1] + (y*GRIDSIZE)) % SCREEN_HEIGHT)
@@ -32,6 +42,7 @@ class Snake(object):
                 self.positions.pop()
                 
     def reset(self):
+        # resets snake to initial state
         self.length = 1
         self.positions = [((SCREEN_WIDTH / 2), (SCREEN_HEIGHT /2))]
         self.direction = random.choice([UP, DOWN, LEFT, RIGHT])
@@ -61,9 +72,10 @@ class Snake(object):
 # food
 class Food(object):
     def __init__(self):
-        self.position = (0, 0)
-        self.color  = (255, 255, 0)
-        self.randomize_position()
+        # initialize food attributes
+        self.position = (0, 0) # initial position of food
+        self.color  = (255, 255, 0) # color of food
+        self.randomize_position() # randomiziation of food
 
     # randomizing food position
     def randomize_position(self):
@@ -92,6 +104,7 @@ GRIDSIZE = 20 #smaller numbers means smaller snake/food
 GRID_WIDTH = SCREEN_HEIGHT / GRIDSIZE
 GRID_HEIGHT = SCREEN_WIDTH / GRIDSIZE
 
+# directions of movement
 UP = (0, -1)
 DOWN = (0, 1)
 LEFT = (-1, 0)
@@ -121,10 +134,16 @@ def main():
         snake.handle_keys()
         drawGrid(surface)
         snake.move()
+
         if snake.get_head_position() == food.position:
             snake.length += 1
             score += 1
             food.randomize_position()
+
+        if snake.game_over():
+            snake.reset()
+            score = 0
+
         snake.draw(surface)
         food.draw(surface)
         screen.blit(surface, (0, 0))
@@ -132,6 +151,6 @@ def main():
         screen.blit(text, (5, 10))
 
         # refresh game screen
-        pygame.display.update() 
+        pygame.display.update()
         
 main()
